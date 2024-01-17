@@ -9,6 +9,12 @@
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap"
       rel="stylesheet"
     />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
     <title>Link Shortener</title>
   </head>
   <style>
@@ -24,14 +30,15 @@
       background: rgba(7, 7, 7, 0.945);
     }
     header {
-      padding: 1.3rem 2.5rem 12px;
+      padding: 0.5rem 2.5rem;
       background-color: black;
+      box-shadow: 1px 1px 18px rgba(255, 255, 255, 0.671);
     }
     .logo {
       font-family: Arial, Helvetica, sans-serif;
       font-style: italic;
       font-weight: 600;
-      font-size: 5rem;
+      font-size: 4.5rem;
       background: linear-gradient(to right, #ff6600, #a300039a);
       background-clip: text;
       -webkit-background-clip: text;
@@ -58,17 +65,21 @@
       flex-direction: column;
       margin-top: 50px;
       gap: 40px;
-      border: 1px solid white;
       height: 400px;
     }
     .banner p {
-      color: #ff0004;
+      /* color: #ff0004; */
       font-size: 2rem;
       font-weight: 700;
+      background: linear-gradient(98.37deg, #f89e00 0.99%, #da2f68 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     .banner p span {
-      color: #ff6600;
+      /* color: #ffae00; */
       cursor: pointer;
+      /* text-shadow: 3px 2px 5px #ffae00; */
     }
     .banner p span:hover {
       color: #dd4c4f;
@@ -78,7 +89,6 @@
       align-items: center;
       justify-content: center;
       width: 100%;
-      border: 1px solid yellow;
     }
     .form input {
       width: calc(100% - 100px);
@@ -100,23 +110,39 @@
       color: white;
     }
     .conditionDiv {
+      width: 100%;
       display: flex;
       flex-direction: column;
-      border: 1px solid white;
       align-items: center;
       gap: 8px;
     }
     .generatedUrlSpan {
       color: #f89e00;
-      font-size: 1.5rem;
+      font-size: 1.7rem;
     }
     .generatedUrl {
-      font-size: 1.3rem;
-      text-decoration: none;
-      color: white;
+      display: flex;
+      background-color: white;
     }
-    .generatedUrl:visited {
+    .generatedUrl a {
+      font-size: 1rem;
+      text-decoration: none;
+      color: black;
+      background-color: white;
+      padding: 0.5rem;
+    }
+    .generatedUrl a:visited {
       color: blueviolet;
+    }
+    .generatedUrl a:hover {
+      color: #da2f68;
+    }
+    .generatedUrl span {
+      color: white;
+      font-size: 1rem;
+      background: #f89e00;
+      padding: 0.5rem;
+      cursor: pointer;
     }
 
     @media screen and (min-width: 1000px) {
@@ -133,9 +159,31 @@
         width: 150px;
         height: 55px;
       }
+      .conditionDiv {
+        flex-direction: row;
+        justify-content: center;
+      }
+      .generatedUrlSpan {
+        font-size: 2rem;
+      }
+      .generatedUrl a {
+        font-size: 1.3rem;
+        padding: 1rem;
+      }
+      .generatedUrl span {
+        font-size: 1.3rem;
+        padding: 1rem;
+      }
+    }
+    .alertDiv {
+      position: absolute;
+      top: 8%;
+      left: 50%;
+      transform: translate(-50%, -50%);
     }
   </style>
   <body>
+    <div id="liveAlertPlaceholder" class="alertDiv"></div>
     <header>
       <h1 class="logo">Link<span>ly</span></h1>
     </header>
@@ -153,17 +201,57 @@
         </form>
         <% if (locals.id) { %>
         <div class="conditionDiv">
-          <span class="generatedUrlSpan">Generated URL:</span>
-          <a
-            href="http://localhost:3000/link/<%= id %>"
-            target="_blank"
-            class="generatedUrl"
-          >
-            http://localhost:3000/link/<%= id %></a
-          >
+          <span class="generatedUrlSpan">Generated URL :</span>
+          <div class="generatedUrl">
+            <a
+              href="http://localhost:3000/link/<%= id %>"
+              target="_blank"
+              id="generatedUrl"
+            >
+              http://localhost:3000/link/<%= id %></a
+            >
+            <span onclick="copyLink()" id="liveAlertBtn">Copy</span>
+          </div>
         </div>
         <% } %>
       </div>
     </div>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+      integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+      crossorigin="anonymous"
+    ></script>
+
+    <script>
+      const generatedUrl = document.getElementById("generatedUrl").innerText;
+      const copyLink = async () => {
+        try {
+          await navigator.clipboard.writeText(generatedUrl);
+          console.log("Content copied to clipboard");
+        } catch (err) {
+          console.error("Failed to copy: ", err);
+        }
+      };
+
+      const alertPlaceholder = document.getElementById("liveAlertPlaceholder");
+      const appendAlert = (message, type) => {
+        const wrapper = document.createElement("div");
+        wrapper.innerHTML = [
+          `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+          `   <div>${message}</div>`,
+          '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+          "</div>",
+        ].join("");
+
+        alertPlaceholder.append(wrapper);
+      };
+
+      const alertTrigger = document.getElementById("liveAlertBtn");
+      if (alertTrigger) {
+        alertTrigger.addEventListener("click", () => {
+          appendAlert("Link Copied to Clipboard!", "success");
+        });
+      }
+    </script>
   </body>
 </html>
